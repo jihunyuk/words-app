@@ -40,7 +40,26 @@ def format_page_label(page_key: str) -> str:
 
 def render_word_card(page_key: str, number: int, word: str, meaning: str):
     with st.expander(f"**{number}.** {word}", expanded=st.session_state.show_all_meanings):
-        st.info(meaning)
+        cols = st.columns([4, 1])
+        with cols[0]:
+            st.info(meaning)
+        with cols[1]:
+            search_url = f"https://www.google.com/search?q={word}+발음"
+            st.markdown(
+                f'''<a href="{search_url}" target="_blank" style="
+                    display: inline-block;
+                    padding: 0.5em 1em;
+                    color: white;
+                    background-color: #424242;
+                    text-align: center;
+                    text-decoration: none;
+                    border-radius: 4px;
+                    width: 100%;
+                    font-size: 14px;
+                    margin-top: 2px;
+                ">발음 🔊</a>''',
+                unsafe_allow_html=True,
+            )
 
 
 def render_footer():
