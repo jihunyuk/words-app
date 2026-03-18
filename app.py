@@ -41,7 +41,7 @@ def format_page_label(page_key: str) -> str:
 def render_word_card(page_key: str, number: int, word: str, meaning: str):
     with st.expander(f"**{number}.** {word}", expanded=st.session_state.show_all_meanings):
         search_url = f"https://www.google.com/search?q={word}+발음"
-        html_content = f'<div style="display: flex; justify-content: space-between; align-items: center; margin: 0; padding: 0;"><div style="margin-right: 12px; font-size: 1rem;">{meaning}</div><a href="{search_url}" target="_blank" style="padding: 6px 12px; color: white; background-color: #424242; text-decoration: none; border-radius: 6px; font-size: 14px; white-space: nowrap;">발음 🔊</a></div>'
+        html_content = f'<div style="display: flex; justify-content: space-between; align-items: center; margin: 0; padding: 0 0 8px 0;"><div style="margin-left: 16px; margin-right: 12px; font-size: 1rem;">{meaning}</div><a href="{search_url}" target="_blank" style="padding: 6px 12px; color: white; background-color: #424242; text-decoration: none; border-radius: 6px; font-size: 14px; white-space: nowrap;">발음 🔊</a></div>'
         st.markdown(html_content, unsafe_allow_html=True)
 
 
