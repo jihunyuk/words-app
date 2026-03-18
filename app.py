@@ -89,20 +89,22 @@ def main():
     with st.sidebar:
         st.header("단어장 선택")
 
-        # Page selection grid
-        cols = st.columns(3)
-        for i, page_key in enumerate(page_options):
-            col = cols[i % 3]
-            page_num = page_key.split("_")[1]
-            is_active = st.session_state.selected_page == page_key
-            if col.button(
-                f"{page_num}",
-                key=f"select_{page_key}",
-                use_container_width=True,
-                type="primary" if is_active else "secondary",
-            ):
-                st.session_state.selected_page = page_key
-                st.rerun()
+        # Page selection grid (row-based for correct mobile ordering)
+        for i in range(0, len(page_options), 3):
+            cols = st.columns(3)
+            for j in range(3):
+                if i + j < len(page_options):
+                    page_key = page_options[i + j]
+                    page_num = page_key.split("_")[1]
+                    is_active = st.session_state.selected_page == page_key
+                    if cols[j].button(
+                        f"{page_num}",
+                        key=f"select_{page_key}",
+                        use_container_width=True,
+                        type="primary" if is_active else "secondary",
+                    ):
+                        st.session_state.selected_page = page_key
+                        st.rerun()
 
         selected_page = st.session_state.selected_page
 
