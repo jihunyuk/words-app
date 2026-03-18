@@ -40,26 +40,25 @@ def format_page_label(page_key: str) -> str:
 
 def render_word_card(page_key: str, number: int, word: str, meaning: str):
     with st.expander(f"**{number}.** {word}", expanded=st.session_state.show_all_meanings):
-        cols = st.columns([4, 1])
-        with cols[0]:
-            st.info(meaning)
-        with cols[1]:
-            search_url = f"https://www.google.com/search?q={word}+발음"
-            st.markdown(
-                f'''<a href="{search_url}" target="_blank" style="
-                    display: inline-block;
-                    padding: 0.5em 1em;
-                    color: white;
-                    background-color: #424242;
-                    text-align: center;
-                    text-decoration: none;
-                    border-radius: 4px;
-                    width: 100%;
-                    font-size: 14px;
-                    margin-top: 2px;
-                ">발음 🔊</a>''',
-                unsafe_allow_html=True,
-            )
+        search_url = f"https://www.google.com/search?q={word}+발음"
+        html_content = f'''
+        <div style="display: flex; justify-content: space-between; align-items: center; 
+                    padding: 12px 16px; 
+                    background-color: var(--secondary-background-color); 
+                    border-radius: 8px;">
+            <div style="margin-right: 12px;">{meaning}</div>
+            <a href="{search_url}" target="_blank" style="
+                padding: 6px 12px;
+                color: white;
+                background-color: #424242;
+                text-decoration: none;
+                border-radius: 6px;
+                font-size: 14px;
+                white-space: nowrap;
+            ">발음 🔊</a>
+        </div>
+        '''
+        st.markdown(html_content, unsafe_allow_html=True)
 
 
 def render_footer():
