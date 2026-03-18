@@ -1,5 +1,5 @@
 import streamlit as st
-from data import word_data
+from data import word_data as raw_word_data
 
 APP_TITLE = "Words"
 APP_SUBTITLE = "학원 영단어 앱"
@@ -10,20 +10,18 @@ DEVELOPER = "Jihun Yuk"
 TOTAL_PAGES = 20
 
 
+@st.cache_data
+def load_word_data():
+    return raw_word_data
+
+word_data = load_word_data()
+
+
 def init_session_state():
     if "show_all_meanings" not in st.session_state:
         st.session_state.show_all_meanings = False
-    if "revealed_words" not in st.session_state:
-        st.session_state.revealed_words = set()
     if "selected_page" not in st.session_state:
         st.session_state.selected_page = "page_1"
-
-
-def toggle_word(word_id: str):
-    if word_id in st.session_state.revealed_words:
-        st.session_state.revealed_words.remove(word_id)
-    else:
-        st.session_state.revealed_words.add(word_id)
 
 
 def get_page_options():
@@ -41,19 +39,8 @@ def format_page_label(page_key: str) -> str:
 
 
 def render_word_card(page_key: str, number: int, word: str, meaning: str):
-    word_id = f"{page_key}_{number}"
-    is_revealed = (
-        st.session_state.show_all_meanings
-        or word_id in st.session_state.revealed_words
-    )
-
-    with st.container(border=True):
-        st.markdown(f"### {number}. {word}")
-
-        label = meaning if is_revealed else "뜻 보기"
-        if st.button(label, key=f"btn_{word_id}", use_container_width=True, type="secondary" if not is_revealed else "primary"):
-            toggle_word(word_id)
-            st.rerun()
+    with st.expander(f"**{number}.** {word}", expanded=st.session_state.show_all_meanings):
+        st.info(meaning)
 
 
 def render_footer():
@@ -110,13 +97,6 @@ def main():
             value=st.session_state.show_all_meanings,
         )
         st.session_state.show_all_meanings = show_all
-
-        if st.button("현재 페이지 펼친 뜻 초기화", use_container_width=True):
-            prefix = f"{st.session_state.selected_page}_"
-            st.session_state.revealed_words = {
-                x for x in st.session_state.revealed_words if not x.startswith(prefix)
-            }
-            st.rerun()
 
     items = list(word_data.get(selected_page, {}).items())
 
