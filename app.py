@@ -48,18 +48,12 @@ def render_word_card(page_key: str, number: int, word: str, meaning: str):
     )
 
     with st.container(border=True):
-        col1, col2 = st.columns([1, 6])
+        st.markdown(f"### {number}. {word}")
 
-        with col1:
-            st.markdown(f"**{number}.**")
-
-        with col2:
-            st.markdown(f"### {word}")
-
-            label = meaning if is_revealed else "뜻 보기"
-            if st.button(label, key=f"btn_{word_id}", use_container_width=True, type="secondary" if not is_revealed else "primary"):
-                toggle_word(word_id)
-                st.rerun()
+        label = meaning if is_revealed else "뜻 보기"
+        if st.button(label, key=f"btn_{word_id}", use_container_width=True, type="secondary" if not is_revealed else "primary"):
+            toggle_word(word_id)
+            st.rerun()
 
 
 def render_footer():
@@ -83,9 +77,6 @@ def main():
     )
 
     init_session_state()
-
-    st.title(APP_TITLE)
-    st.caption(APP_SUBTITLE)
 
     page_options = get_page_options()
 
