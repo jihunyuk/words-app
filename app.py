@@ -87,28 +87,7 @@ def main():
         st.stop()
 
     with st.sidebar:
-        st.header("단어장 선택")
-
-        # Page selection grid (row-based for correct mobile ordering)
-        for i in range(0, len(page_options), 3):
-            cols = st.columns(3)
-            for j in range(3):
-                if i + j < len(page_options):
-                    page_key = page_options[i + j]
-                    page_num = page_key.split("_")[1]
-                    is_active = st.session_state.selected_page == page_key
-                    if cols[j].button(
-                        f"{page_num}",
-                        key=f"select_{page_key}",
-                        use_container_width=True,
-                        type="primary" if is_active else "secondary",
-                    ):
-                        st.session_state.selected_page = page_key
-                        st.rerun()
-
-        selected_page = st.session_state.selected_page
-
-        st.divider()
+        st.header("설정")
 
         show_all = st.checkbox(
             "전체 뜻 보기",
@@ -117,11 +96,32 @@ def main():
         st.session_state.show_all_meanings = show_all
 
         if st.button("현재 페이지 펼친 뜻 초기화", use_container_width=True):
-            prefix = f"{selected_page}_"
+            prefix = f"{st.session_state.selected_page}_"
             st.session_state.revealed_words = {
                 x for x in st.session_state.revealed_words if not x.startswith(prefix)
             }
             st.rerun()
+
+    # Page selection grid in main area
+    st.markdown("### 단어장 선택")
+    for i in range(0, len(page_options), 3):
+        cols = st.columns(3)
+        for j in range(3):
+            if i + j < len(page_options):
+                page_key = page_options[i + j]
+                page_num = page_key.split("_")[1]
+                is_active = st.session_state.selected_page == page_key
+                if cols[j].button(
+                    f"Page {page_num}",
+                    key=f"select_{page_key}",
+                    use_container_width=True,
+                    type="primary" if is_active else "secondary",
+                ):
+                    st.session_state.selected_page = page_key
+                    st.rerun()
+
+    selected_page = st.session_state.selected_page
+    st.divider()
 
     items = list(word_data.get(selected_page, {}).items())
 
