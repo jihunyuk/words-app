@@ -15,6 +15,8 @@ def init_session_state():
         st.session_state.show_all_meanings = False
     if "revealed_words" not in st.session_state:
         st.session_state.revealed_words = set()
+    if "selected_page" not in st.session_state:
+        st.session_state.selected_page = "page_1"
 
 
 def toggle_word(word_id: str):
@@ -87,11 +89,22 @@ def main():
     with st.sidebar:
         st.header("단어장 선택")
 
-        selected_page = st.selectbox(
-            "페이지",
-            options=page_options,
-            format_func=format_page_label,
-        )
+        # Page selection grid
+        cols = st.columns(3)
+        for i, page_key in enumerate(page_options):
+            col = cols[i % 3]
+            page_num = page_key.split("_")[1]
+            is_active = st.session_state.selected_page == page_key
+            if col.button(
+                f"{page_num}",
+                key=f"select_{page_key}",
+                use_container_width=True,
+                type="primary" if is_active else "secondary",
+            ):
+                st.session_state.selected_page = page_key
+                st.rerun()
+
+        selected_page = st.session_state.selected_page
 
         st.divider()
 
