@@ -1,5 +1,5 @@
 import streamlit as st
-from data import word_data as raw_word_data
+from data import word_data as raw_word_data, idiom_data as raw_idiom_data
 
 APP_TITLE = "Words"
 APP_SUBTITLE = "학원 영단어 앱"
@@ -11,10 +11,10 @@ TOTAL_PAGES = 20
 
 
 @st.cache_data
-def load_word_data():
-    return raw_word_data
+def load_data():
+    return raw_word_data, raw_idiom_data
 
-word_data = load_word_data()
+word_data, idiom_data = load_data()
 
 
 def init_session_state():
@@ -33,15 +33,30 @@ def get_page_options():
     return options
 
 
+def get_idiom_options():
+    options = []
+    for i in range(1, 13):
+        page_key = f"idiom_page_{i}"
+        if page_key in idiom_data:
+            options.append(page_key)
+    return options
+
+
 def format_page_label(page_key: str) -> str:
+    if page_key.startswith("idiom_"):
+        page_num = page_key.split("_")[2]
+        return f"Idiom Page {page_num}"
     page_num = page_key.split("_")[1]
     return f"Page {page_num}"
 
 
-def render_word_card(page_key: str, number: int, word: str, meaning: str):
+def render_word_card(page_key: str, number: int, word: str, meaning: str, is_idiom: bool = False):
     with st.expander(f"**{number}.** {word}", expanded=st.session_state.show_all_meanings):
-        search_url = f"https://www.google.com/search?q={word}+발음"
-        html_content = f'<div style="display: flex; justify-content: space-between; align-items: center; margin: 0; padding: 0 0 8px 0;"><div style="margin-left: 16px; margin-right: 12px; font-size: 1rem;">{meaning}</div><a href="{search_url}" target="_blank" style="padding: 6px 12px; color: white; background-color: #424242; text-decoration: none; border-radius: 6px; font-size: 14px; white-space: nowrap;">발음 🔊</a></div>'
+        if is_idiom:
+            html_content = f'<div style="display: flex; justify-content: space-between; align-items: center; margin: 0; padding: 0 0 8px 0;"><div style="margin-left: 16px; margin-right: 12px; font-size: 1rem;">{meaning}</div></div>'
+        else:
+            search_url = f"https://www.google.com/search?q={word}+발음"
+            html_content = f'<div style="display: flex; justify-content: space-between; align-items: center; margin: 0; padding: 0 0 8px 0;"><div style="margin-left: 16px; margin-right: 12px; font-size: 1rem;">{meaning}</div><a href="{search_url}" target="_blank" style="padding: 6px 12px; color: white; background-color: #424242; text-decoration: none; border-radius: 6px; font-size: 14px; white-space: nowrap;">발음 🔊</a></div>'
         st.markdown(html_content, unsafe_allow_html=True)
 
 
@@ -68,8 +83,9 @@ def main():
     init_session_state()
 
     page_options = get_page_options()
+    idiom_options = get_idiom_options()
 
-    if not page_options:
+    if not page_options and not idiom_options:
         st.error("data.py에서 word_data를 찾을 수 없거나 비어 있습니다.")
         st.stop()
 
@@ -81,6 +97,21 @@ def main():
             is_active = st.session_state.selected_page == page_key
             if st.button(
                 f"Page {page_num}",
+                key=f"select_{page_key}",
+                use_container_width=True,
+                type="primary" if is_active else "secondary",
+            ):
+                st.session_state.selected_page = page_key
+                st.rerun()
+
+        st.divider()
+        st.header("숙어장 선택")
+
+        for page_key in idiom_options:
+            page_num = page_key.split("_")[2]
+            is_active = st.session_state.selected_page == page_key
+            if st.button(
+                f"Idiom Page {page_num}",
                 key=f"select_{page_key}",
                 use_container_width=True,
                 type="primary" if is_active else "secondary",
@@ -100,17 +131,25 @@ def main():
         )
         st.session_state.show_all_meanings = show_all
 
-    items = list(word_data.get(selected_page, {}).items())
+    is_idiom_page = selected_page.startswith("idiom_")
+    if is_idiom_page:
+        items = list(idiom_data.get(selected_page, {}).items())
+        title_label = "숙어장"
+        empty_warning = "표시할 숙어가 없습니다."
+    else:
+        items = list(word_data.get(selected_page, {}).items())
+        title_label = "단어장"
+        empty_warning = "표시할 단어가 없습니다."
 
-    st.subheader(f"{format_page_label(selected_page)} 단어장")
+    st.subheader(f"{format_page_label(selected_page)} {title_label}")
     st.caption(f"총 {len(items)}개 표시")
 
     if not items:
-        st.warning("표시할 단어가 없습니다.")
+        st.warning(empty_warning)
         return
 
     for number, (word, meaning) in items:
-        render_word_card(selected_page, number, word, meaning)
+        render_word_card(selected_page, number, word, meaning, is_idiom=is_idiom_page)
 
     render_footer()
 
